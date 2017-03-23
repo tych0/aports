@@ -1,0 +1,59 @@
+# Maintainer: Tycho Andersen <tycho@docker.com>
+pkgname=refpolicy
+pkgver=20170204
+pkgrel=0
+pkgdesc="SELinux policy reference"
+url="https://github.com/TresysTechnology/refpolicy/wiki"
+arch="all"
+license="GPLv2"
+depends=""
+depends_dev=""
+makedepends="$depends_dev checkpolicy python gawk"
+install=""
+subpackages=""
+source="https://raw.githubusercontent.com/wiki/TresysTechnology/refpolicy/files/refpolicy-2.20170204.tar.bz2"
+builddir="$srcdir/refpolicy"
+
+# policyref config
+monolithic=n
+distro=redhat
+unknown_perms=deny
+
+# This is mostly transliterated from the CentOS spec file
+makeCmds() {
+	make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=1024 bare || return 1
+	make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=1024 conf || return 1
+	#cp $startdir/booleans-$1.conf policy/booleans.conf || return 1
+	#cp $startdir/users-$1 policy/users || return 1
+}
+
+makeModulesConf() {
+	cp $startdir/modules-$1-$2.conf policy/modules-base.conf || return 1
+	cp $startdir/modules-$1-$2.conf policy/modules.conf || return 1
+	if [ "$3" == "contrib" ]; then
+		cp $startdir/modules-$1-$3.conf policy/modules-contrib.conf || return 1
+		cat $startdir/modules-$1-$3.conf >> policy/modules.conf || return 1
+	fi
+}
+
+installCmds() {
+	make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=0124 SEMOD_EXP="/usr/bin/semodule_expand -a" base.pp
+	make validate UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=1024 SEMOD_EXP="/usr/bin/semodule_expand -a" modules
+	make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=0124 DESTDIR="$pkgdir" install
+	make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=0124 DESTDIR="$pkgdir" install-appconfig
+	#make UNK_PERMS=$3 NAME=$1 TYPE=$2 DISTRO=$distro UBAC=n DIRECT_INITRC=y MONOLITHIC=$monolithic MLS_CATS=1024 MCS_CATS=0124 SEMODULE="semodule -p $pkgdir -X 100 " DESTDIR="$pkgdir" load
+}
+
+build() {
+	cd "$builddir"
+	makeCmds minimum mcs $unknown_perms || return 1
+	#makeModulesConf targeted base contrib || return 1
+}
+
+package() {
+	cd "$builddir"
+	echo packaging now
+	installCmds minimum mcs $unknown_perms || return 1
+}
+
+sha512sums="30deabb02a5bde51c463e3e89988d850cff51596c2e72733a064245dec152ea46317eea79550dbe82a7a0d327ec0bcfbd9474ff8a902507392df0da00df6397f  refpolicy-2.20170204.tar.bz2"
