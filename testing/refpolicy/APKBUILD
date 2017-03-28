@@ -1,6 +1,6 @@
 # Maintainer: Tycho Andersen <tycho@docker.com>
 pkgname=refpolicy
-pkgver=20170204
+pkgver=20130424
 pkgrel=0
 pkgdesc="SELinux policy reference"
 url="https://github.com/TresysTechnology/refpolicy/wiki"
@@ -11,7 +11,9 @@ depends_dev=""
 makedepends="$depends_dev checkpolicy python gawk"
 install=""
 subpackages="$pkgname-doc"
-source="https://raw.githubusercontent.com/wiki/TresysTechnology/refpolicy/files/refpolicy-2.20170204.tar.bz2"
+source="https://raw.githubusercontent.com/wiki/TresysTechnology/refpolicy/files/refpolicy-2.$pkgver.tar.bz2
+	policy-rhel-7.1-base.patch
+	"
 builddir="$srcdir/refpolicy"
 
 # policyref config
@@ -54,4 +56,5 @@ package() {
 	# sepolicy manpage -a -p "$pkgdir/usr/share/man/man8/" -w -r "$pkgdir" || return 1
 	}
 
-sha512sums="30deabb02a5bde51c463e3e89988d850cff51596c2e72733a064245dec152ea46317eea79550dbe82a7a0d327ec0bcfbd9474ff8a902507392df0da00df6397f  refpolicy-2.20170204.tar.bz2"
+sha512sums="82ab38bc3425eb4b7d50c42564ebc28603e32e6f3266da164502f0cdc3a2f6bfe457518297824cb78f6f94211f9823fbc7254bb9e1d9df1cc7f284d326299705  refpolicy-2.20130424.tar.bz2
+f815a6cec7d8fc2d45c30d72b5feecf820ece5a748b5c17091ae473b73d010ec473b6fecad78628a893ccd184bf1012a090a30bc58b64ec2fe8d568c7113cde6  policy-rhel-7.1-base.patch"
